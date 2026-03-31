@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { ShieldBan, ArrowRight, Lock, Mail, Loader2, Sparkles } from 'lucide-react';
+import { ShieldBan, ArrowRight, Lock, Mail, Loader2, Sparkles, User } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,13 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       setError('');
-      const response = await api.post('/auth/register', { email, password });
+      if (!name.trim()) throw new Error('Name is required');
+      
+      const response = await api.post('/auth/register', { 
+        name: name.trim(), 
+        email: email.trim(), 
+        password 
+      });
       
       // Auto login on successful registration
       Cookies.set('apiKey', response.data.apiKey, { expires: 7 }); 
@@ -27,7 +34,7 @@ export default function RegisterPage() {
       
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Try a different email.');
+      setError(err.response?.data?.message || err.message || 'Registration failed. Try a different email.');
     } finally {
       setLoading(false);
     }
@@ -58,28 +65,42 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-6 relative z-10">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-fuchsia-500" /> New Operator Email
+                <User className="w-4 h-4 text-fuchsia-400" /> Operator Name
+            </label>
+            <input 
+              type="text" 
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 transition-all text-white font-medium"
+              placeholder="Sentinel Agent 007"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-purple-400" /> New Operator Email
             </label>
             <input 
               type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 transition-all text-white font-medium"
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white font-medium"
               placeholder="admin@sentinel.dev"
             />
           </div>
 
           <div>
              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-purple-500" /> Secure Passcode
+                <Lock className="w-4 h-4 text-indigo-400" /> Secure Passcode
             </label>
             <input 
               type="password" 
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-white font-medium tracking-widest"
+              className="w-full bg-black/50 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white font-medium tracking-widest"
               placeholder="••••••••••••"
             />
           </div>
